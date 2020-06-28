@@ -1,0 +1,2 @@
+# StrategicSolutionInc.
+Stategic Solution Demo
