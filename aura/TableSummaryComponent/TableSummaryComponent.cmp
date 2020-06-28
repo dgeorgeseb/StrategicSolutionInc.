@@ -1,0 +1,120 @@
+<aura:component controller = "TableSummaryClass" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" access="global" >
+    <aura:attribute name="tabledata" type="list"/>
+     <aura:attribute name="addtabledata" type="list"/>
+    <aura:attribute name="isSelectAll" type="boolean" default="false"/>
+    <aura:attribute name="addrowSection" type="boolean" default="false"/>
+    <aura:attribute name="totalrowcount" type="Integer" default="0" />
+    <aura:attribute name="checkrowcount" type="Integer" default="0" />
+    <aura:attribute name="totalbalance" type="String" default="0" />
+    <aura:attribute name="Spinner" type="boolean" default="false" />
+    
+    <ltng:require styles="{! $Resource.newDatatable + '/DataTables-1.10.20/css/jquery.dataTables.min.css'}" 
+                  scripts="{!join(',', $Resource.jquery224 , $Resource.newDatatable + '/DataTables-1.10.20/js/jquery.dataTables.min.js')}" afterScriptsLoaded="{!c.scriptsLoaded}" />
+    <aura:handler name='init' value='{!this}' action ='{!c.doInit}'/>
+    <aura:if isTrue="{!v.Spinner}">
+        
+        
+        <div aura:id="spinnerId" class="slds-spinner_container">
+            <div class="slds-spinner--brand  slds-spinner slds-spinner--large slds-is-relative" role="alert">
+                <span class="slds-assistive-text">Loading</span>
+                <div class="slds-spinner__dot-a"></div>
+                <div class="slds-spinner__dot-b"></div>
+            </div>
+        </div>
+        
+    </aura:if>
+    <div class="slds-m-around_xx-large">
+        <h1 class="slds-text-heading--medium">Table Summary</h1>
+        <br/>
+        <div class="slds-grid slds-gutters" >
+            <div class="slds-col slds-size_12-of-12" >
+                <div class="slds-m-around_medium">
+                    <table id="tableId" class="slds-table slds-table_bordered slds-table_cell-buffer" cellspacing="0" width="100%">
+                        <thead>
+                            <tr >
+                                <th > <label class="slds-checkbox">
+                                    <ui:inputCheckbox value="{!v.isSelectAll}" change="{!c.handleSelectAllRows}" aura:id="selectAll"/>
+                                    <span class="slds-checkbox--faux" />
+                                    <span class="slds-form-element__label"></span>
+                                    </label></th>
+                                <th scope="col"  style="width:20%;"><div  title="Creditor">Creditor</div></th>
+                                <th scope="col"  style="width:10%;"><div  title="First Name">First Name</div></th>
+                                <th scope="col"  style="width:10%;"><div  title="Last Name">Last Name</div></th>
+                                <th scope="col"  style="width:10%;"><div  title="Min Pay%">Min Pay%</div></th>
+                                <th scope="col"  style="width:35%;"><div  title="Balance">Balance</div></th>
+                                
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <aura:iteration items="{!v.tabledata}" var ="t">
+                                <tr>
+                                    <td><label class="slds-checkbox">
+                                        <ui:inputCheckbox aura:id="checkRow" value="" text="{!t.id}"  change="{!c.checkedValue}"/>
+                                        <span class="slds-checkbox--faux" />
+                                        <span class="slds-form-element__label"></span>
+                                        </label></td>
+                                    <td  style="width:20%;"><div  title="{!t.creditorName}">{!t.creditorName}</div></td>
+                                    <td  style="width:10%;"><div  title="{!t.firstName}">{!t.firstName}</div></td>
+                                    <td  style="width:10%;"><div  title="{!t.lastName}">{!t.lastName}</div></td>
+                                    <td  style="width:10%;"><div  title="{!t.minPaymentPercentage}"><lightning:formattedNumber value="{!t.minPaymentPercentage/100}" style="percent" maximumFractionDigits="2" minimumFractionDigits="2"/></div></td>
+                                    <td  style="width:35%;"><div  title="{!t.balance}"><ui:outputCurrency  aura:id="balance" value="{!t.balance}"/></div></td>
+                                    
+                                    
+                                </tr>
+                            </aura:iteration>
+                            
+                                                      
+                        </tbody>
+                        
+                    </table>
+                    <aura:if isTrue="{!v.addrowSection}">
+                     <table id="table1Id" class="slds-table slds-table_bordered slds-table_cell-buffer" cellspacing="0" width="100%">
+                          <tbody>
+                             
+                              <aura:iteration items="{!v.addtabledata}" var ="at">
+                                      <tr>
+                                        
+                                        <td  style="width:20%;"> <lightning:input label="Creditor" name="newcreditorName" type="text"  value="{!at.creditorName}" /></td>
+                                        <td  style="width:10%;"><lightning:input  label="First Name" name="newfirstName" type="text"  value="{!at.firstName}" /></td>
+                                        <td  style="width:10%;"><lightning:input label="Last Name" name="newlastName" type="text"  value="{!at.lastName}" /></td>
+                                          <td  style="width:10%;"><lightning:input label="Min Pay%" aura:id="newminPaymentPercentage" name="newminPaymentPercentage" type="number" formatter="percent" step="0.01" min="0" max="100"  value="{!at.minPaymentPercentage}" ></lightning:input> </td>
+                                        <td  style="width:35%;"><lightning:input label="Balance" name="newbalance" type="number" step="1" formatter="currency"  value="{!at.balance}" /></td>
+                                        <td > <lightning:button label="Save" class="slds-button_brand" onclick="{!c.saveRow}"  /></td >
+                                    </tr> 
+                              </aura:iteration>
+                         </tbody>
+                    </table>
+                    </aura:if>
+                    <table id="table2Id" class="slds-table slds-table_bordered slds-table_cell-buffer" cellspacing="0" width="100%">
+                        <tr >
+                             <aura:if isTrue="{!v.addrowSection == false}">
+                            <td >
+                                <lightning:button label="Add Debt" class="slds-button_brand" onclick="{!c.addRow}"  />
+                            </td >
+                            </aura:if>
+                            <td >
+                                <lightning:button label="Remove Debt" class="slds-button_brand" onclick="{!c.removeRow}" />
+                            </td>
+                        </tr>
+                        
+                        <tr class='total' style="background-color:lightblue">
+                            <td><b>Total</b></td>
+                            <td  style="width:20%;"></td>
+                            <td  style="width:10%;"></td>
+                            <td  style="width:10%;"></td>
+                            <td  style="width:5%;"></td>
+                            <td  style="width:35%;  text-align: center!important;"><b><ui:outputCurrency value="{!v.totalbalance}"/></b></td>
+                        </tr>
+                        <tr>
+                            <td style="width:20%;"><b>Total Row Count:  {!v.totalrowcount}</b></td>
+                            <td style="width:20%;"><b>Check Row Count:  {!v.checkrowcount}</b></td>
+                        </tr>
+                        
+                    </table>
+                </div>
+            </div>
+            
+        </div>
+        
+    </div>
+</aura:component>

@@ -1,0 +1,16 @@
+.THIS table.dataTable thead tr th {
+    font-family:'Open Sans'; 
+    color: #E8E8E8;
+    background-color: #006584;
+}
+.THIS table.dataTable thead th{
+    font-weight: normal;
+    text-align: center;
+}
+
+.THIS div.dataTables_length {
+    float: right !important;
+}
+.THIS table.dataTable tbody td {
+    text-align: center;
+}
